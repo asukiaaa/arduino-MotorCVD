@@ -36,7 +36,7 @@ class Driver {
 
   int setDriveDataNumber(int32_t number) {
     uint32_t dataNumber = number;
-    return modbus.writeRegistersBy32t(address, Address::Speed, &dataNumber, 1);
+    return modbus.writeRegistersBy32t(address, Address::DriveDataNumber, &dataNumber, 1);
   }
 
   int readAlarm(uint16_t* alarm) {
