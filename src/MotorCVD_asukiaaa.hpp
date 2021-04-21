@@ -25,11 +25,11 @@ enum CommandBit {
 
 class Driver {
  public:
-  Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe, uint8_t address)
+  Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe, uint8_t address = 1)
       : modbus(serial, pinDe, pinRe), address(address) {}
 
-  void begin(int baudrate, int config) {
-    modbus.begin(baudrate, config);
+  void begin(int baudrate = 115200, int serialConfig = SERIAL_8E1) {
+    modbus.begin(baudrate, serialConfig);
     delay(50);
     setDriveDataNumber(0);
   }
