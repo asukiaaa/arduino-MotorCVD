@@ -2,6 +2,17 @@
 
 A library to use oriental motor CVD2B-KR or CVD5B-KR series series in RS485 modbus.
 
+## Seftware setup
+
+### Arduino IDE
+
+1. Open library manager
+2. Install `MotorCVD_asukiaaa`
+
+### PlatformIO
+
+Add `MotorCVD_asukiaaa` to lib_deps of platformio.ini.
+
 ## Hardware setup
 
 ### SW1: Motor type
@@ -23,6 +34,10 @@ A|PKP25\*D28\*A2<br />PKP26\*D28\*2<br />PKP26\*MD28\*2|2.8
 ### SW2: End resistor for RS485
 
 Both `ON` to activate. If you don't need them, set both `OFF`.
+
+## Usage
+
+See [an example](examples/forwardAndReverse/forwardAndReverse.ino).
 
 ## License
 
