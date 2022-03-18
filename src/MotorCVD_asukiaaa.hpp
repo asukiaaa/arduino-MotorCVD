@@ -24,7 +24,7 @@ enum CommandBit {
   Reverse = 0x8000,
 };
 
-enum InformationCode: uint32_t {
+enum InformationCode : uint32_t {
   DriverTemperature = 0x4,
   OverVoltage = 0x10,
   UnderVoltage = 0x20,
@@ -98,32 +98,46 @@ String getLabelsOfInformation(uint32_t info) {
 
 class Driver {
  public:
-  Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe, uint8_t address = 1)
-      : modbus(serial, pinDe, pinRe), address(address) {}
+  Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe,
+         uint8_t address = 1)
+      : address(address) {
+    this->modbus = new rs485_asukiaaa::ModbusRtu::Central(serial, pinDe, pinRe);
+  }
+  Driver(rs485_asukiaaa::ModbusRtu::Central* modbus, uint8_t address = 1)
+      : address(address) {
+    this->modbus = modbus;
+  }
+
+  void beginWithoutModbus() {
+    setDriveDataNumber(0);
+  }
+
+  void beginWithoutModbus() { setDriveDataNumber(0); }
 
   void begin(int baudrate = 115200, int serialConfig = SERIAL_8E1) {
-    modbus.begin(baudrate, serialConfig);
+    modbus->begin(baudrate, serialConfig);
     delay(50);
-    setDriveDataNumber(0);
+    beginWithoutModbus();
   }
 
   int setDriveDataNumber(int32_t number) {
     uint32_t dataNumber = number;
-    return modbus.writeRegistersBy32t(address, Address::DriveDataNumber, &dataNumber, 1);
+    return modbus->writeRegistersBy32t(address, Address::DriveDataNumber,
+                                       &dataNumber, 1);
   }
 
   int readAlarm(uint16_t* alarm) {
-    return modbus.readRegistersBy16t(address, Address::Alarm + 1, alarm, 1);
+    return modbus->readRegistersBy16t(address, Address::Alarm + 1, alarm, 1);
   }
 
   int readInformation(uint32_t* info) {
-    return modbus.readRegistersBy32t(address, Address::Information, info, 1);
+    return modbus->readRegistersBy32t(address, Address::Information, info, 1);
   }
 
   int readPosition(int32_t* position) {
     uint32_t v;
     int result =
-        modbus.readRegistersBy32t(address, Address::CurrentPosition, &v, 1);
+        modbus->readRegistersBy32t(address, Address::CurrentPosition, &v, 1);
     if (result != 0) return result;
     *position = v;
     return 0;
@@ -133,12 +147,12 @@ class Driver {
     bool isReverse = speed < 0;
     auto absSpeed = normalizeSpeed(speed);
     int result =
-        modbus.writeRegistersBy32t(address, Address::Speed, &absSpeed, 1);
+        modbus->writeRegistersBy32t(address, Address::Speed, &absSpeed, 1);
     if (result != 0) return result;
-    return modbus.writeRegisterBy16t(address, Address::DriverCommand,
-                                     absSpeed == 0 ? 0
-                                     : isReverse   ? CommandBit::Reverse
-                                                   : CommandBit::Forward);
+    return modbus->writeRegisterBy16t(address, Address::DriverCommand,
+                                      absSpeed == 0 ? 0
+                                      : isReverse   ? CommandBit::Reverse
+                                                    : CommandBit::Forward);
   }
 
   int writeStep(int32_t speed, int32_t step) {
@@ -147,14 +161,14 @@ class Driver {
     buffs[0] = step;
     buffs[1] = absSpeed;
     int result =
-        modbus.writeRegistersBy32t(address, Address::TargetPosition, buffs, 2);
+        modbus->writeRegistersBy32t(address, Address::TargetPosition, buffs, 2);
     if (result != 0) return result;
     // TODO write start
-    return modbus.writeRegisterBy16t(address, Address::DriverCommand,
-                                     CommandBit::StartR);
+    return modbus->writeRegisterBy16t(address, Address::DriverCommand,
+                                      CommandBit::StartR);
   }
 
-  rs485_asukiaaa::ModbusRtu::Central modbus;
+  rs485_asukiaaa::ModbusRtu::Central* modbus;
 
  private:
   const uint8_t address;
