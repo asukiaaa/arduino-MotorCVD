@@ -100,16 +100,17 @@ class Driver {
  public:
   Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe,
          uint8_t address = 1)
-      : address(address) {
+      : address(address), createdModbus(true) {
     this->modbus = new rs485_asukiaaa::ModbusRtu::Central(serial, pinDe, pinRe);
   }
   Driver(rs485_asukiaaa::ModbusRtu::Central* modbus, uint8_t address = 1)
-      : address(address) {
+      : address(address), createdModbus(false) {
     this->modbus = modbus;
   }
-
-  void beginWithoutModbus() {
-    setDriveDataNumber(0);
+  ~Driver() {
+    if (createdModbus) {
+      delete modbus;
+    }
   }
 
   void beginWithoutModbus() { setDriveDataNumber(0); }
@@ -172,6 +173,7 @@ class Driver {
 
  private:
   const uint8_t address;
+  const boolean createdModbus;
   uint32_t normalizeSpeed(int32_t speed) {
     uint32_t absSpeed = abs(speed);
     if (absSpeed > SPEED_MAX) absSpeed = SPEED_MAX;
