@@ -45,6 +45,7 @@ MIT
 
 ## References
 
+- CVD series manual [ja](https://www.orientalmotor.co.jp/download/manual_search.action?productName=CVD2B&searchPattern=1&gengoId=1), [en](https://www.orientalmotor.co.jp/download/manual_search.action?productName=CVD2B&searchPattern=1&gengoId=2&x=29&y=13)
 - [CVD2B-KR](https://www.orientalmotor.co.jp/products/detail.action?hinmei=CVD2B-KR)
 - [CVD2BR-KR](https://www.orientalmotor.co.jp/products/detail.action?hinmei=CVD2BR-KR)
 - [CVD5B-KR](https://www.orientalmotor.co.jp/products/detail.action?hinmei=CVD5B-KR)
