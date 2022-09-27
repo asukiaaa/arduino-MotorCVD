@@ -173,7 +173,7 @@ class Driver {
 
  private:
   const uint8_t address;
-  const boolean createdModbus;
+  const bool createdModbus;
   uint32_t normalizeSpeed(int32_t speed) {
     uint32_t absSpeed = abs(speed);
     if (absSpeed > SPEED_MAX) absSpeed = SPEED_MAX;
