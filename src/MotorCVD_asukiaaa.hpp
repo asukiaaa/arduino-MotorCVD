@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <rs485_asukiaaa.h>
 
+#include <OrientalCommon_asukiaaa.hpp>
+#include <OrientalCommon_asukiaaa/StepMotorDirectDataOperation.hpp>
+
 namespace MotorCVD_asukiaaa {
 
 const int SPEED_MAX = 5000;
@@ -96,17 +99,22 @@ String getLabelsOfInformation(uint32_t info) {
   return strInfo;
 }
 
-class Driver {
+namespace DirectOperationType =
+    OrientalCommon_asukiaaa::StepMotorDirectOperation::DirectOperationType;
+using OrientalCommon_asukiaaa::StepMotorDirectOperation::DirectOperation;
+
+class Driver : public OrientalCommon_asukiaaa::StepMotorDirectOperation::Core {
  public:
   Driver(HardwareSerial* serial, int16_t pinDe, int16_t pinRe,
          uint8_t address = 1)
-      : address(address), createdModbus(true) {
-    this->modbus = new rs485_asukiaaa::ModbusRtu::Central(serial, pinDe, pinRe);
-  }
+      : address(address),
+        modbus(new rs485_asukiaaa::ModbusRtu::Central(serial, pinDe, pinRe)),
+        createdModbus(true) {}
+
   Driver(rs485_asukiaaa::ModbusRtu::Central* modbus, uint8_t address = 1)
-      : address(address), createdModbus(false) {
-    this->modbus = modbus;
-  }
+      : address(address),
+        modbus(modbus),
+        createdModbus(false) {}
   ~Driver() {
     if (createdModbus) {
       delete modbus;
@@ -169,10 +177,12 @@ class Driver {
                                       CommandBit::StartR);
   }
 
-  rs485_asukiaaa::ModbusRtu::Central* modbus;
+  rs485_asukiaaa::ModbusRtu::Central *getModbus() { return modbus; }
+  uint8_t getAddress() { return address; }
 
  private:
   const uint8_t address;
+  rs485_asukiaaa::ModbusRtu::Central* modbus;
   const bool createdModbus;
   uint32_t normalizeSpeed(int32_t speed) {
     uint32_t absSpeed = abs(speed);
