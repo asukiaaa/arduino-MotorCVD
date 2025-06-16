@@ -11,8 +11,10 @@ namespace MotorCVD_asukiaaa {
 
 const int SPEED_MAX = 5000;
 
-enum Address {
+enum Address : uint16_t {
   CurrentPosition = 0x00c6,
+  // CurrentRPerMin = 0x00c8,
+  CurrentHz = 0x00ca,
   TargetPosition = 0x1802,
   Speed = 0x0480,
   DriveDataNumber = 0x007b,
@@ -112,9 +114,7 @@ class Driver : public OrientalCommon_asukiaaa::StepMotorDirectOperation::Core {
         createdModbus(true) {}
 
   Driver(rs485_asukiaaa::ModbusRtu::Central* modbus, uint8_t address = 1)
-      : address(address),
-        modbus(modbus),
-        createdModbus(false) {}
+      : address(address), modbus(modbus), createdModbus(false) {}
   ~Driver() {
     if (createdModbus) {
       delete modbus;
@@ -152,6 +152,14 @@ class Driver : public OrientalCommon_asukiaaa::StepMotorDirectOperation::Core {
     return 0;
   }
 
+  int readCurrentHz(int32_t* hz) {
+    uint32_t v;
+    int result = modbus->readRegistersBy32t(address, Address::CurrentHz, &v, 1);
+    if (result != 0) return result;
+    *hz = v;
+    return 0;
+  }
+
   int writeSpeed(int32_t speed) {
     bool isReverse = speed < 0;
     auto absSpeed = normalizeSpeed(speed);
@@ -177,7 +185,7 @@ class Driver : public OrientalCommon_asukiaaa::StepMotorDirectOperation::Core {
                                       CommandBit::StartR);
   }
 
-  rs485_asukiaaa::ModbusRtu::Central *getModbus() { return modbus; }
+  rs485_asukiaaa::ModbusRtu::Central* getModbus() { return modbus; }
   uint8_t getAddress() { return address; }
 
  private:
